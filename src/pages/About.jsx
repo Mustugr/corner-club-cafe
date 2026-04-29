@@ -33,40 +33,42 @@ export default function About() {
       />
 
       <section className="section bg-cream-50">
-        <div className="container-x grid items-center gap-12 lg:grid-cols-2">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-accent">
-              Cliffside Park, NJ
-            </p>
-            <h2 className="font-display text-3xl font-semibold sm:text-4xl">
-              A neighborhood café built on warmth
+        <div className="container-x grid items-center gap-14 lg:grid-cols-12">
+          <div className="lg:col-span-6">
+            <span className="eyebrow">Cliffside Park · NJ</span>
+            <h2 className="mt-4 font-display text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+              A neighborhood café
+              <br className="hidden sm:block" /> built on warmth.
             </h2>
-            <div className="mt-6 space-y-5 text-coffee-500">
+            <div className="mt-7 space-y-5 leading-relaxed text-coffee-500">
               <p>
-                Corner Club Cafe is a cozy neighborhood coffee shop located in
-                Cliffside Park, New Jersey. We created a warm and welcoming
-                space where guests can enjoy handcrafted drinks, fresh food,
-                and relaxing café moments.
+                Corner Club Cafe is a cozy neighborhood coffee shop in Cliffside
+                Park, New Jersey. We built a warm, welcoming space where guests
+                can enjoy handcrafted drinks, fresh food, and slow café moments.
               </p>
               <p>
                 From espresso and cappuccino to Turkish tea, breakfast plates,
-                pastries, sandwiches, and desserts, our menu is built around
+                pastries, sandwiches, and desserts — the menu is built around
                 comfort, freshness, and everyday quality.
               </p>
               <p>
-                Whether you're stopping by for your morning coffee, meeting
-                friends, or relaxing with dessert in the afternoon, Corner
-                Club Cafe is designed to feel like your local favorite spot.
+                Stop in for your morning coffee, meet friends, or settle in
+                with dessert in the afternoon. We're designed to feel like
+                your local favorite spot.
               </p>
+            </div>
+            <div className="mt-10 grid grid-cols-3 gap-6 border-t border-coffee-100 pt-8">
+              <Stat value="2024" label="Established" />
+              <Stat value="7 days" label="Open weekly" />
+              <Stat value="100%" label="Made fresh" />
             </div>
           </div>
 
-          <div className="relative">
-            <div className="absolute -left-4 -top-4 h-full w-full rounded-3xl bg-accent/15" />
+          <div className="lg:col-span-6">
             <img
               src="/images/restaurant.jpg"
               alt="Corner Club Cafe interior"
-              className="relative h-full w-full rounded-3xl object-cover shadow-soft"
+              className="aspect-[4/5] w-full rounded-md object-cover"
             />
           </div>
         </div>
@@ -74,31 +76,55 @@ export default function About() {
 
       <section className="section bg-coffee-50">
         <div className="container-x">
-          <div className="section-heading">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.3em] text-accent">
-              What we offer
+          <div className="mb-16 grid gap-8 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-7">
+              <span className="eyebrow">What we offer</span>
+              <h2 className="mt-4 font-display text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+                More than coffee.
+              </h2>
+            </div>
+            <p className="text-coffee-400 lg:col-span-5 lg:max-w-sm">
+              A full café experience built around quality, comfort, and
+              community — from your first sip to your last bite.
             </p>
-            <h2>More than coffee</h2>
-            <p>A full café experience built around quality, comfort, and community.</p>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {HIGHLIGHTS.map((h) => (
-              <div
+              <article
                 key={h.title}
-                className="card transition hover:-translate-y-1 hover:shadow-soft"
+                className="card group relative overflow-hidden"
               >
-                <div className="mb-4 grid h-11 w-11 place-items-center rounded-full bg-accent/10 text-accent">
-                  <i className={`fa-solid ${h.icon}`} aria-hidden="true" />
+                <span
+                  className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
+                  aria-hidden="true"
+                />
+                <div className="mb-5 grid h-12 w-12 place-items-center rounded-md bg-coffee-50 text-coffee-700 transition group-hover:bg-coffee-700 group-hover:text-cream-50">
+                  <i className={`fa-solid ${h.icon} text-lg`} aria-hidden="true" />
                 </div>
-                <h3 className="font-display text-lg font-semibold">{h.title}</h3>
+                <h3 className="font-display text-lg font-semibold tracking-tight">
+                  {h.title}
+                </h3>
                 <p className="mt-2 text-sm leading-relaxed text-coffee-400">
                   {h.body}
                 </p>
-              </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
     </>
+  );
+}
+
+function Stat({ value, label }) {
+  return (
+    <div>
+      <p className="font-display text-2xl font-semibold tracking-tight text-coffee-700 sm:text-3xl">
+        {value}
+      </p>
+      <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-400">
+        {label}
+      </p>
+    </div>
   );
 }

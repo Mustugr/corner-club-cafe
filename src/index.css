@@ -21,34 +21,40 @@
     @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-coffee-600 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-cream-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-coffee-700 active:translate-y-0;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-coffee-700 px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-cream-50 transition-colors hover:bg-accent;
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-coffee-600 bg-transparent px-6 py-3 text-sm font-semibold uppercase tracking-wide text-coffee-700 transition-all hover:bg-coffee-600 hover:text-cream-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-coffee-700 bg-transparent px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-700 transition-colors hover:bg-coffee-700 hover:text-cream-50;
   }
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-soft transition-all hover:-translate-y-0.5 hover:bg-accent-dark;
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-accent px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-accent-dark;
+  }
+  .btn-ghost-light {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-cream-50/70 bg-transparent px-7 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-cream-50 transition-colors hover:bg-cream-50 hover:text-coffee-700;
   }
   .section {
-    @apply py-16 sm:py-20;
+    @apply py-20 sm:py-28;
   }
   .section-heading {
-    @apply mx-auto mb-12 max-w-2xl text-center;
+    @apply mx-auto mb-14 max-w-2xl text-center;
   }
   .section-heading h2 {
-    @apply text-3xl sm:text-4xl font-semibold;
+    @apply text-4xl sm:text-5xl font-semibold tracking-tight;
   }
   .section-heading p {
-    @apply mt-3 text-coffee-400;
+    @apply mt-4 text-coffee-400;
+  }
+  .eyebrow {
+    @apply inline-block text-[11px] font-bold uppercase tracking-[0.28em] text-accent;
   }
   .card {
     @apply rounded-md bg-white p-7 border border-coffee-100 transition-all duration-300 hover:border-accent/40 hover:shadow-card;
   }
   .input {
-    @apply w-full rounded-xl border border-coffee-100 bg-white px-4 py-3 text-coffee-700 outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20;
+    @apply w-full rounded-sm border border-coffee-100 bg-white px-4 py-3 text-coffee-700 outline-none transition focus:border-coffee-700 focus:ring-2 focus:ring-coffee-700/10;
   }
   .label {
-    @apply block text-sm font-medium text-coffee-500 mb-1;
+    @apply block text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-500 mb-2;
   }
 }
 

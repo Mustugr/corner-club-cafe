@@ -1,55 +1,59 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import PageHero from "../components/PageHero";
 import { tableSections, cardSections, allCategories } from "../data/menu";
 import { useCart, formatPrice } from "../context/CartContext";
 
+const FIRST_CATEGORY = allCategories[0]?.id ?? "coffee";
+
 export default function Menu() {
-  const [active, setActive] = useState("all");
+  const [active, setActive] = useState(FIRST_CATEGORY);
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState(null);
-  const { addItem } = useCart();
+  const tabsRef = useRef(null);
+  const { addItem, itemCount } = useCart();
+
+  const isSearching = query.trim() !== "";
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 1800);
+    const t = setTimeout(() => setToast(null), 2200);
     return () => clearTimeout(t);
   }, [toast]);
 
   const handleAdd = (id, name, price) => {
     addItem({ id, name, price });
-    setToast(`${name} added to cart`);
+    setToast(name);
   };
+
+  const matches = (text) =>
+    !isSearching || text.toLowerCase().includes(query.toLowerCase());
 
   const visibleTableSections = useMemo(() => {
     return tableSections
-      .filter((s) => active === "all" || active === s.id)
-      .map((s) => ({
-        ...s,
-        rows: s.rows.filter((r) =>
-          query.trim() === ""
-            ? true
-            : r.name.toLowerCase().includes(query.toLowerCase())
-        ),
-      }))
+      .filter((s) => isSearching || s.id === active)
+      .map((s) => ({ ...s, rows: s.rows.filter((r) => matches(r.name)) }))
       .filter((s) => s.rows.length > 0);
   }, [active, query]);
 
   const visibleCardSections = useMemo(() => {
     return cardSections
-      .filter((s) => active === "all" || active === s.id)
-      .map((s) => ({
-        ...s,
-        items: s.items.filter((it) =>
-          query.trim() === ""
-            ? true
-            : it.name.toLowerCase().includes(query.toLowerCase())
-        ),
-      }))
+      .filter((s) => isSearching || s.id === active)
+      .map((s) => ({ ...s, items: s.items.filter((it) => matches(it.name)) }))
       .filter((s) => s.items.length > 0);
   }, [active, query]);
 
   const isEmpty =
     visibleTableSections.length === 0 && visibleCardSections.length === 0;
+
+  const visibleCount =
+    visibleTableSections.reduce((n, s) => n + s.rows.length, 0) +
+    visibleCardSections.reduce((n, s) => n + s.items.length, 0);
+
+  const selectCategory = (id) => {
+    setActive(id);
+    setQuery("");
+  };
 
   return (
     <>
@@ -59,44 +63,88 @@ export default function Menu() {
         subtitle="Coffee, tea, breakfast, sandwiches, pastries, and desserts — all made with care."
       />
 
-      <section className="sticky top-[68px] z-30 border-b border-coffee-100/70 bg-cream-50/95 backdrop-blur">
-        <div className="container-x flex flex-col gap-4 py-4 md:flex-row md:items-center md:justify-between">
-          <div className="relative md:w-72">
+      <section className="sticky top-[68px] z-30 border-b border-coffee-100 bg-cream-50/95 backdrop-blur">
+        <div className="container-x py-4">
+          <div className="relative w-full">
             <i className="fa-solid fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-coffee-300" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search the menu…"
-              className="input pl-10"
+              placeholder="Search the menu"
+              className="input pl-11 pr-11"
             />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-sm text-coffee-400 transition hover:bg-coffee-50 hover:text-coffee-700"
+              >
+                <i className="fa-solid fa-xmark text-sm" />
+              </button>
+            )}
           </div>
-          <div className="-mx-2 flex gap-2 overflow-x-auto px-2 no-scrollbar md:mx-0 md:px-0">
-            <CategoryChip
-              active={active === "all"}
-              onClick={() => setActive("all")}
-              icon="fa-list"
-              label="All"
-            />
+        </div>
+
+        {!isSearching && (
+          <div
+            ref={tabsRef}
+            className="container-x flex gap-7 overflow-x-auto border-t border-coffee-100/70 no-scrollbar"
+          >
             {allCategories.map((c) => (
-              <CategoryChip
+              <CategoryTab
                 key={c.id}
                 active={active === c.id}
-                onClick={() => setActive(c.id)}
-                icon={c.icon}
+                onClick={() => selectCategory(c.id)}
                 label={c.title}
               />
             ))}
           </div>
-        </div>
+        )}
+
+        {isSearching && !isEmpty && (
+          <div className="container-x flex items-center justify-between gap-3 border-t border-coffee-100 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-coffee-500">
+            <span>
+              <span className="text-coffee-700">{visibleCount}</span> result
+              {visibleCount === 1 ? "" : "s"} for "
+              <span className="text-coffee-700">{query}</span>"
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="text-accent transition hover:text-accent-dark"
+            >
+              Clear
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="section bg-cream-50">
-        <div className="container-x space-y-16">
+        <div className="container-x space-y-20">
           {isEmpty && (
-            <p className="rounded-md border border-coffee-100 bg-white p-8 text-center text-coffee-400">
-              Nothing matches that search. Try a different keyword or category.
-            </p>
+            <div className="mx-auto max-w-md py-16 text-center">
+              <div className="mx-auto mb-6 grid h-12 w-12 place-items-center rounded-sm bg-coffee-50 text-coffee-700">
+                <i className="fa-solid fa-magnifying-glass" />
+              </div>
+              <p className="font-display text-2xl font-semibold tracking-tight">
+                No matches found.
+              </p>
+              <p className="mt-2 text-coffee-400">
+                Try a different keyword, or pick a category below.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setActive(FIRST_CATEGORY);
+                }}
+                className="btn-accent mt-7"
+              >
+                Browse Menu
+              </button>
+            </div>
           )}
 
           {visibleTableSections.map((s) => (
@@ -113,27 +161,37 @@ export default function Menu() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-coffee-700 px-5 py-3 text-sm font-medium text-cream-50 shadow-soft"
+          className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-sm bg-coffee-700 py-3 pl-5 pr-3 text-cream-50 shadow-soft"
         >
-          <i className="fa-solid fa-check mr-2 text-accent" /> {toast}
+          <span className="flex items-center gap-2">
+            <i className="fa-solid fa-check text-accent" />
+            <span className="text-sm font-medium">
+              Added — <span className="text-cream-50">{toast}</span>
+            </span>
+          </span>
+          <Link
+            to="/cart"
+            className="rounded-sm bg-accent px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition hover:bg-accent-dark"
+          >
+            View Cart{itemCount > 0 && ` (${itemCount})`}
+          </Link>
         </div>
       )}
     </>
   );
 }
 
-function CategoryChip({ active, onClick, icon, label }) {
+function CategoryTab({ active, onClick, label }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wide transition ${
+      className={`relative shrink-0 py-4 text-[12px] font-bold uppercase tracking-[0.2em] transition-colors ${
         active
-          ? "border-coffee-600 bg-coffee-600 text-cream-50"
-          : "border-coffee-100 bg-white text-coffee-500 hover:border-coffee-300"
+          ? "text-coffee-700 after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:bg-coffee-700"
+          : "text-coffee-400 hover:text-coffee-700"
       }`}
     >
-      <i className={`fa-solid ${icon}`} aria-hidden="true" />
       {label}
     </button>
   );
@@ -141,21 +199,14 @@ function CategoryChip({ active, onClick, icon, label }) {
 
 function SectionHeader({ section }) {
   return (
-    <div className="mb-6 flex items-end justify-between gap-4">
-      <div>
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-accent/10 text-accent">
-            <i className={`fa-solid ${section.icon}`} aria-hidden="true" />
-          </span>
-          <h2 className="font-display text-2xl font-semibold sm:text-3xl">
-            {section.title}
-          </h2>
-        </div>
-        {section.note && (
-          <p className="mt-2 text-sm text-coffee-400">{section.note}</p>
-        )}
-      </div>
-    </div>
+    <header className="mb-10 max-w-2xl">
+      <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+        {section.title}
+      </h2>
+      {section.note && (
+        <p className="mt-4 text-coffee-400">{section.note}</p>
+      )}
+    </header>
   );
 }
 
@@ -163,54 +214,85 @@ function TableSection({ section, onAdd }) {
   return (
     <article id={section.id}>
       <SectionHeader section={section} />
-      <div className="overflow-hidden rounded-md bg-white border border-coffee-100">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-coffee-50 text-xs uppercase tracking-wide text-coffee-500">
-              <tr>
-                <th className="px-5 py-4 font-semibold">Drink</th>
-                {section.sizes.map((sz) => (
-                  <th key={sz} className="px-5 py-4 font-semibold">
-                    {sz}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-coffee-50">
-              {section.rows.map((row) => (
-                <tr key={row.name} className="transition hover:bg-cream-50/60">
-                  <td className="px-5 py-4 font-medium text-coffee-700">
-                    {row.name}
-                  </td>
-                  {row.prices.map((p, i) => (
-                    <td key={i} className="px-5 py-4">
-                      {p == null ? (
-                        <span className="text-coffee-200">—</span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            onAdd(
-                              `${section.id}:${row.name}:${section.sizes[i]}`,
-                              `${row.name} (${section.sizes[i]})`,
-                              p
-                            )
-                          }
-                          className="group inline-flex items-center gap-2 rounded-full border border-coffee-100 bg-cream-50 px-3 py-1.5 text-sm font-semibold text-coffee-700 transition hover:border-accent hover:bg-accent hover:text-white"
-                        >
-                          <span>{formatPrice(p)}</span>
-                          <i className="fa-solid fa-plus text-[11px] opacity-60 transition group-hover:opacity-100" />
-                        </button>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+
+      {/* Desktop: clean borderless rows */}
+      <ul className="hidden divide-y divide-coffee-100 border-y border-coffee-100 md:block">
+        {section.rows.map((row) => (
+          <li
+            key={row.name}
+            className="grid grid-cols-[1fr_auto] items-center gap-6 py-5"
+          >
+            <p className="font-display text-lg font-semibold tracking-tight text-coffee-700">
+              {row.name}
+            </p>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {row.prices.map((p, i) =>
+                p == null ? null : (
+                  <SizePriceButton
+                    key={i}
+                    size={section.sizes[i]}
+                    price={p}
+                    onClick={() =>
+                      onAdd(
+                        `${section.id}:${row.name}:${section.sizes[i]}`,
+                        `${row.name} (${section.sizes[i]})`,
+                        p
+                      )
+                    }
+                  />
+                )
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Mobile: stacked */}
+      <ul className="divide-y divide-coffee-100 border-y border-coffee-100 md:hidden">
+        {section.rows.map((row) => (
+          <li key={row.name} className="py-5">
+            <p className="font-display text-base font-semibold tracking-tight text-coffee-700">
+              {row.name}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {row.prices.map((p, i) =>
+                p == null ? null : (
+                  <SizePriceButton
+                    key={i}
+                    size={section.sizes[i]}
+                    price={p}
+                    onClick={() =>
+                      onAdd(
+                        `${section.id}:${row.name}:${section.sizes[i]}`,
+                        `${row.name} (${section.sizes[i]})`,
+                        p
+                      )
+                    }
+                  />
+                )
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
     </article>
+  );
+}
+
+function SizePriceButton({ size, price, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group inline-flex items-center gap-2 rounded-sm border border-coffee-200 bg-white px-3 py-1.5 transition hover:border-coffee-700 hover:bg-coffee-700"
+    >
+      <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-coffee-400 transition group-hover:text-cream-50/70">
+        {size}
+      </span>
+      <span className="text-sm font-semibold tabular-nums text-coffee-700 transition group-hover:text-cream-50">
+        {formatPrice(price)}
+      </span>
+    </button>
   );
 }
 
@@ -218,41 +300,43 @@ function CardSection({ section, onAdd }) {
   return (
     <article id={section.id}>
       <SectionHeader section={section} />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {section.items.map((item) => (
-          <div
+      <ul className="grid divide-y divide-coffee-100 border-y border-coffee-100 sm:grid-cols-2 sm:gap-x-12 sm:divide-y-0">
+        {section.items.map((item, i) => (
+          <li
             key={item.name}
-            className="group relative flex flex-col overflow-hidden rounded-md border border-coffee-100 bg-white p-6 transition-all duration-300 hover:border-accent/40 hover:shadow-card"
+            className={`flex items-start justify-between gap-6 py-6 ${
+              i >= 2 ? "sm:border-t sm:border-coffee-100" : ""
+            }`}
           >
-            <span
-              className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
-              aria-hidden="true"
-            />
-            <div className="flex items-start justify-between gap-3">
-              <h3 className="font-display text-lg font-semibold leading-tight tracking-tight">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-display text-lg font-semibold leading-tight tracking-tight text-coffee-700">
                 {item.name}
               </h3>
-              <span className="shrink-0 rounded-sm bg-coffee-50 px-2.5 py-1 text-sm font-semibold tabular-nums text-coffee-700">
+              {item.desc && (
+                <p className="mt-1.5 text-sm leading-relaxed text-coffee-400">
+                  {item.desc}
+                </p>
+              )}
+            </div>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <span className="font-display text-xl font-semibold tabular-nums tracking-tight text-coffee-700">
                 {formatPrice(item.price)}
               </span>
+              <button
+                type="button"
+                onClick={() =>
+                  onAdd(`${section.id}:${item.name}`, item.name, item.price)
+                }
+                aria-label={`Add ${item.name} to cart`}
+                className="inline-flex items-center gap-1.5 rounded-sm bg-coffee-700 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-cream-50 transition hover:bg-accent"
+              >
+                <i className="fa-solid fa-plus text-[10px]" />
+                Add
+              </button>
             </div>
-            {item.desc && (
-              <p className="mt-2 text-sm leading-relaxed text-coffee-400">
-                {item.desc}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() =>
-                onAdd(`${section.id}:${item.name}`, item.name, item.price)
-              }
-              className="mt-5 inline-flex items-center justify-center gap-2 rounded-sm bg-coffee-700 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-cream-50 transition hover:bg-accent"
-            >
-              <i className="fa-solid fa-plus" /> Add to Cart
-            </button>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </article>
   );
 }

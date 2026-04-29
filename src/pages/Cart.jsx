@@ -35,26 +35,29 @@ export default function Cart() {
           ) : (
             <div className="grid gap-8 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                <div className="mb-5 flex items-center justify-between">
-                  <h2 className="font-display text-2xl font-semibold">
-                    Current Order
-                  </h2>
-                  <span className="rounded-full bg-coffee-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-coffee-500">
+                <div className="mb-6 flex items-end justify-between border-b border-coffee-100 pb-5">
+                  <div>
+                    <span className="eyebrow">Order</span>
+                    <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">
+                      Current Order
+                    </h2>
+                  </div>
+                  <span className="rounded-sm border border-coffee-100 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-500">
                     {itemCount} {itemCount === 1 ? "item" : "items"}
                   </span>
                 </div>
 
-                <ul className="space-y-4">
+                <ul className="divide-y divide-coffee-100 border-b border-coffee-100">
                   {items.map((item) => (
                     <li
                       key={item.id}
-                      className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-card ring-1 ring-coffee-100/60 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
-                        <h3 className="font-display text-lg font-semibold leading-tight">
+                        <h3 className="font-display text-lg font-semibold leading-tight tracking-tight">
                           {item.name}
                         </h3>
-                        <p className="mt-1 text-sm text-coffee-400">
+                        <p className="mt-1 text-sm tabular-nums text-coffee-400">
                           {formatPrice(item.price)} each
                         </p>
                       </div>
@@ -65,14 +68,14 @@ export default function Cart() {
                           onMinus={() => decrease(item.id)}
                           onPlus={() => increase(item.id)}
                         />
-                        <span className="w-20 text-right font-semibold text-coffee-700">
+                        <span className="w-20 text-right font-semibold tabular-nums text-coffee-700">
                           {formatPrice(item.price * item.qty)}
                         </span>
                         <button
                           type="button"
                           onClick={() => remove(item.id)}
                           aria-label={`Remove ${item.name}`}
-                          className="grid h-9 w-9 place-items-center rounded-full text-coffee-400 transition hover:bg-red-50 hover:text-red-500"
+                          className="grid h-9 w-9 place-items-center rounded-sm text-coffee-400 transition hover:bg-red-50 hover:text-red-500"
                         >
                           <i className="fa-solid fa-trash" />
                         </button>
@@ -83,32 +86,33 @@ export default function Cart() {
               </div>
 
               <aside className="lg:col-span-1">
-                <div className="card sticky top-24">
-                  <h3 className="font-display text-xl font-semibold">
+                <div className="sticky top-24 rounded-md border border-coffee-100 bg-white p-7">
+                  <span className="eyebrow">Summary</span>
+                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight">
                     Order Summary
                   </h3>
-                  <dl className="mt-5 space-y-3 text-sm">
+                  <dl className="mt-6 space-y-3 text-sm">
                     <SummaryRow label="Subtotal" value={formatPrice(subtotal)} />
                     <SummaryRow
                       label={`Tax (${(taxRate * 100).toFixed(2).replace(/\.00$/, "")}%)`}
                       value={formatPrice(tax)}
                     />
-                    <div className="my-4 h-px bg-coffee-100" />
+                    <div className="my-5 h-px bg-coffee-100" />
                     <div className="flex items-baseline justify-between">
-                      <dt className="font-display text-lg font-semibold">Total</dt>
-                      <dd className="font-display text-2xl font-semibold text-coffee-700">
+                      <dt className="text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-500">Total</dt>
+                      <dd className="font-display text-3xl font-semibold tabular-nums tracking-tight text-coffee-700">
                         {formatPrice(total)}
                       </dd>
                     </div>
                   </dl>
 
-                  <button type="button" className="btn-accent mt-6 w-full">
-                    <i className="fa-solid fa-credit-card" /> Checkout
+                  <button type="button" className="btn-accent mt-7 w-full">
+                    Checkout
                   </button>
                   <button
                     type="button"
                     onClick={clear}
-                    className="mt-3 w-full rounded-full border-2 border-coffee-100 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-coffee-500 transition hover:border-red-300 hover:text-red-500"
+                    className="mt-3 w-full rounded-sm border border-coffee-100 px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-500 transition hover:border-red-300 hover:text-red-500"
                   >
                     Clear Cart
                   </button>
@@ -124,23 +128,23 @@ export default function Cart() {
 
 function QtyControl({ qty, onMinus, onPlus }) {
   return (
-    <div className="inline-flex items-center rounded-full bg-cream-50 ring-1 ring-coffee-100">
+    <div className="inline-flex items-center rounded-sm border border-coffee-100 bg-white">
       <button
         type="button"
         onClick={onMinus}
         aria-label="Decrease quantity"
-        className="grid h-9 w-9 place-items-center rounded-full text-coffee-500 transition hover:bg-coffee-100"
+        className="grid h-9 w-9 place-items-center text-coffee-500 transition hover:bg-coffee-50 hover:text-coffee-700"
       >
         <i className="fa-solid fa-minus text-xs" />
       </button>
-      <span className="w-8 text-center text-sm font-semibold text-coffee-700">
+      <span className="w-8 text-center text-sm font-semibold tabular-nums text-coffee-700">
         {qty}
       </span>
       <button
         type="button"
         onClick={onPlus}
         aria-label="Increase quantity"
-        className="grid h-9 w-9 place-items-center rounded-full text-coffee-500 transition hover:bg-coffee-100"
+        className="grid h-9 w-9 place-items-center text-coffee-500 transition hover:bg-coffee-50 hover:text-coffee-700"
       >
         <i className="fa-solid fa-plus text-xs" />
       </button>
@@ -159,16 +163,19 @@ function SummaryRow({ label, value }) {
 
 function EmptyCart() {
   return (
-    <div className="card mx-auto max-w-xl text-center">
-      <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-full bg-accent/10 text-2xl text-accent">
+    <div className="mx-auto max-w-xl rounded-md border border-coffee-100 bg-white p-12 text-center">
+      <div className="mx-auto mb-6 grid h-14 w-14 place-items-center rounded-sm bg-coffee-50 text-xl text-coffee-700">
         <i className="fa-solid fa-basket-shopping" />
       </div>
-      <h2 className="font-display text-2xl font-semibold">Your cart is empty</h2>
-      <p className="mt-2 text-coffee-400">
+      <span className="eyebrow">Empty</span>
+      <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight">
+        Your cart is empty.
+      </h2>
+      <p className="mt-3 text-coffee-400">
         Browse the menu to add drinks, breakfast, sandwiches, and desserts.
       </p>
-      <Link to="/menu" className="btn-accent mt-6">
-        <i className="fa-solid fa-mug-hot" /> Browse Menu
+      <Link to="/menu" className="btn-accent mt-7">
+        Browse Menu
       </Link>
     </div>
   );

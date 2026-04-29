@@ -31,7 +31,8 @@ export default function Contact() {
       <section className="section bg-cream-50">
         <div className="container-x grid gap-8 lg:grid-cols-5">
           <div className="card lg:col-span-2">
-            <h2 className="font-display text-2xl font-semibold">Visit Us</h2>
+            <span className="eyebrow">Visit</span>
+            <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight sm:text-3xl">Stop by, say hi.</h2>
             <ul className="mt-5 space-y-4 text-sm">
               <InfoRow icon="fa-location-dot" label="Address">
                 <strong className="block text-coffee-700">Corner Club Cafe</strong>
@@ -54,12 +55,12 @@ export default function Contact() {
               </InfoRow>
             </ul>
 
-            <div className="mt-6 overflow-hidden rounded-2xl ring-1 ring-coffee-100">
+            <div className="mt-7 overflow-hidden rounded-md border border-coffee-100">
               <iframe
                 title="Corner Club Cafe location"
                 src="https://www.google.com/maps?q=Corner+Club,+646+Anderson+Ave,+Cliffside+Park,+NJ+07010&output=embed"
                 width="100%"
-                height="280"
+                height="300"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
@@ -69,8 +70,9 @@ export default function Contact() {
           </div>
 
           <div className="card lg:col-span-3">
-            <h2 className="font-display text-2xl font-semibold">Send a Message</h2>
-            <p className="mt-2 text-sm text-coffee-400">
+            <span className="eyebrow">Get in touch</span>
+            <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight sm:text-3xl">Send us a message.</h2>
+            <p className="mt-3 text-sm text-coffee-400">
               Questions, catering inquiries, or feedback — drop a note and we'll
               get back to you.
             </p>
@@ -121,10 +123,10 @@ export default function Contact() {
               {status && (
                 <p
                   role="status"
-                  className={`rounded-xl px-4 py-3 text-sm ${
+                  className={`rounded-sm border px-4 py-3 text-sm ${
                     status.type === "success"
-                      ? "bg-green-50 text-green-700 ring-1 ring-green-200"
-                      : "bg-red-50 text-red-700 ring-1 ring-red-200"
+                      ? "border-green-200 bg-green-50 text-green-700"
+                      : "border-red-200 bg-red-50 text-red-700"
                   }`}
                 >
                   {status.text}
@@ -141,12 +143,12 @@ export default function Contact() {
 function InfoRow({ icon, brand, label, children }) {
   return (
     <li className="flex items-start gap-4">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-sm bg-coffee-50 text-coffee-700">
         <i className={`${brand ? "fa-brands" : "fa-solid"} ${icon}`} aria-hidden="true" />
       </span>
       <div className="text-coffee-500">
-        <p className="text-xs font-semibold uppercase tracking-wide text-coffee-400">{label}</p>
-        <div className="mt-1 leading-relaxed">{children}</div>
+        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-400">{label}</p>
+        <div className="mt-1.5 leading-relaxed">{children}</div>
       </div>
     </li>
   );
