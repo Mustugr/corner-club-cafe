@@ -94,7 +94,7 @@ export default function Menu() {
       <section className="section bg-cream-50">
         <div className="container-x space-y-16">
           {isEmpty && (
-            <p className="rounded-2xl bg-white p-8 text-center text-coffee-400 shadow-card">
+            <p className="rounded-md border border-coffee-100 bg-white p-8 text-center text-coffee-400">
               Nothing matches that search. Try a different keyword or category.
             </p>
           )}
@@ -163,7 +163,7 @@ function TableSection({ section, onAdd }) {
   return (
     <article id={section.id}>
       <SectionHeader section={section} />
-      <div className="overflow-hidden rounded-2xl bg-white shadow-card ring-1 ring-coffee-100/60">
+      <div className="overflow-hidden rounded-md bg-white border border-coffee-100">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-coffee-50 text-xs uppercase tracking-wide text-coffee-500">
@@ -222,13 +222,17 @@ function CardSection({ section, onAdd }) {
         {section.items.map((item) => (
           <div
             key={item.name}
-            className="group flex flex-col rounded-2xl bg-white p-5 shadow-card ring-1 ring-coffee-100/60 transition hover:-translate-y-0.5 hover:shadow-soft"
+            className="group relative flex flex-col overflow-hidden rounded-md border border-coffee-100 bg-white p-6 transition-all duration-300 hover:border-accent/40 hover:shadow-card"
           >
+            <span
+              className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
+              aria-hidden="true"
+            />
             <div className="flex items-start justify-between gap-3">
-              <h3 className="font-display text-lg font-semibold leading-tight">
+              <h3 className="font-display text-lg font-semibold leading-tight tracking-tight">
                 {item.name}
               </h3>
-              <span className="shrink-0 rounded-full bg-coffee-50 px-3 py-1 text-sm font-semibold text-coffee-700">
+              <span className="shrink-0 rounded-sm bg-coffee-50 px-2.5 py-1 text-sm font-semibold tabular-nums text-coffee-700">
                 {formatPrice(item.price)}
               </span>
             </div>
@@ -242,7 +246,7 @@ function CardSection({ section, onAdd }) {
               onClick={() =>
                 onAdd(`${section.id}:${item.name}`, item.name, item.price)
               }
-              className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-coffee-600 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-cream-50 transition hover:bg-accent"
+              className="mt-5 inline-flex items-center justify-center gap-2 rounded-sm bg-coffee-700 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-cream-50 transition hover:bg-accent"
             >
               <i className="fa-solid fa-plus" /> Add to Cart
             </button>

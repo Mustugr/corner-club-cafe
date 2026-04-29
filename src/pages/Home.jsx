@@ -81,16 +81,20 @@ function Features() {
           <h2>Crafted with care, every day</h2>
           <p>Simple, fresh, and welcoming — the way a neighborhood café should feel.</p>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-3">
           {FEATURES.map((f) => (
             <article
               key={f.title}
-              className="card group transition hover:-translate-y-1 hover:shadow-soft"
+              className="card group relative overflow-hidden"
             >
-              <div className="mb-5 grid h-12 w-12 place-items-center rounded-full bg-coffee-600 text-cream-50 transition group-hover:bg-accent">
+              <span
+                className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
+                aria-hidden="true"
+              />
+              <div className="mb-6 grid h-12 w-12 place-items-center rounded-md bg-coffee-50 text-coffee-700 transition group-hover:bg-coffee-700 group-hover:text-cream-50">
                 <i className={`fa-solid ${f.icon} text-lg`} aria-hidden="true" />
               </div>
-              <h3 className="font-display text-xl font-semibold">{f.title}</h3>
+              <h3 className="font-display text-xl font-semibold tracking-tight">{f.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-coffee-400">{f.body}</p>
             </article>
           ))}

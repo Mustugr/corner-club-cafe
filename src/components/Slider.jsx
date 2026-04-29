@@ -36,7 +36,7 @@ export default function Slider() {
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl shadow-soft"
+      className="relative mx-auto w-full max-w-md overflow-hidden rounded-3xl shadow-soft"
       onMouseEnter={pause}
       onMouseLeave={resume}
     >
@@ -47,7 +47,7 @@ export default function Slider() {
         {SLIDES.map((src, i) => (
           <div
             key={src}
-            className="relative h-[55vw] max-h-[520px] min-h-[280px] w-full shrink-0"
+            className="relative aspect-[4/5] w-full shrink-0"
           >
             <img
               src={src}
