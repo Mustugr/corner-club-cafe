@@ -1,43 +1,42 @@
-import { createContext, useContext, useEffect, useMemo, useReducer } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from "react";
+import { api, getSessionId } from "../lib/api";
 
-const STORAGE_KEY = "ccc_cart_v2";
 const TAX_RATE = 0.0625;
 
 const CartContext = createContext(null);
 
-function readInitial() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
 function reducer(state, action) {
   switch (action.type) {
+    case "hydrate":
+      return action.items;
     case "add": {
-      const { id, name, price } = action.item;
-      const existing = state.find((i) => i.id === id);
+      const { sku, name, price } = action.item;
+      const existing = state.find((i) => i.sku === sku);
       if (existing) {
         return state.map((i) =>
-          i.id === id ? { ...i, qty: i.qty + 1 } : i
+          i.sku === sku ? { ...i, qty: i.qty + 1 } : i
         );
       }
-      return [...state, { id, name, price, qty: 1 }];
+      return [...state, { sku, name, price, qty: 1 }];
     }
     case "increase":
       return state.map((i) =>
-        i.id === action.id ? { ...i, qty: i.qty + 1 } : i
+        i.sku === action.sku ? { ...i, qty: i.qty + 1 } : i
       );
     case "decrease":
       return state
-        .map((i) => (i.id === action.id ? { ...i, qty: i.qty - 1 } : i))
+        .map((i) => (i.sku === action.sku ? { ...i, qty: i.qty - 1 } : i))
         .filter((i) => i.qty > 0);
     case "remove":
-      return state.filter((i) => i.id !== action.id);
+      return state.filter((i) => i.sku !== action.sku);
     case "clear":
       return [];
     default:
@@ -46,15 +45,65 @@ function reducer(state, action) {
 }
 
 export function CartProvider({ children }) {
-  const [items, dispatch] = useReducer(reducer, undefined, readInitial);
+  const [items, dispatch] = useReducer(reducer, []);
+  const sessionIdRef = useRef(null);
+  const hydratedRef = useRef(false);
+  const syncTimer = useRef(null);
 
+  // Hydrate from the server on mount.
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      /* ignore quota errors */
-    }
+    sessionIdRef.current = getSessionId();
+    let cancelled = false;
+    api
+      .getCart(sessionIdRef.current)
+      .then((cart) => {
+        if (cancelled) return;
+        const serverItems = (cart?.items ?? []).map((i) => ({
+          sku: i.sku,
+          name: i.name,
+          price: i.price,
+          qty: i.qty,
+        }));
+        dispatch({ type: "hydrate", items: serverItems });
+      })
+      .catch((err) => {
+        console.warn("Cart hydrate failed:", err.message);
+      })
+      .finally(() => {
+        hydratedRef.current = true;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Persist to the server (debounced) after any local change post-hydration.
+  useEffect(() => {
+    if (!hydratedRef.current || !sessionIdRef.current) return;
+    if (syncTimer.current) clearTimeout(syncTimer.current);
+    syncTimer.current = setTimeout(() => {
+      api
+        .putCart(
+          sessionIdRef.current,
+          items.map((i) => ({ sku: i.sku, qty: i.qty }))
+        )
+        .catch((err) => console.warn("Cart sync failed:", err.message));
+    }, 250);
+    return () => clearTimeout(syncTimer.current);
   }, [items]);
+
+  const placeOrder = useCallback(
+    async (customer = {}) => {
+      const order = await api.createOrder({
+        sessionId: sessionIdRef.current,
+        items: items.map((i) => ({ sku: i.sku, qty: i.qty })),
+        customer,
+      });
+      dispatch({ type: "clear" });
+      return order;
+    },
+    [items]
+  );
 
   const value = useMemo(() => {
     const itemCount = items.reduce((sum, i) => sum + i.qty, 0);
@@ -70,12 +119,13 @@ export function CartProvider({ children }) {
       total,
       taxRate: TAX_RATE,
       addItem: (item) => dispatch({ type: "add", item }),
-      increase: (id) => dispatch({ type: "increase", id }),
-      decrease: (id) => dispatch({ type: "decrease", id }),
-      remove: (id) => dispatch({ type: "remove", id }),
+      increase: (sku) => dispatch({ type: "increase", sku }),
+      decrease: (sku) => dispatch({ type: "decrease", sku }),
+      remove: (sku) => dispatch({ type: "remove", sku }),
       clear: () => dispatch({ type: "clear" }),
+      placeOrder,
     };
-  }, [items]);
+  }, [items, placeOrder]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

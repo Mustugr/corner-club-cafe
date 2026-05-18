@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import PageHero from "../components/PageHero";
 import { useCart, formatPrice } from "../context/CartContext";
@@ -14,7 +15,27 @@ export default function Cart() {
     decrease,
     remove,
     clear,
+    placeOrder,
   } = useCart();
+
+  const [customer, setCustomer] = useState({ name: "", email: "", note: "" });
+  const [placing, setPlacing] = useState(false);
+  const [error, setError] = useState(null);
+  const [confirmation, setConfirmation] = useState(null);
+
+  const onCheckout = async () => {
+    setPlacing(true);
+    setError(null);
+    try {
+      const order = await placeOrder(customer);
+      setConfirmation(order);
+      setCustomer({ name: "", email: "", note: "" });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setPlacing(false);
+    }
+  };
 
   return (
     <>
@@ -30,7 +51,9 @@ export default function Cart() {
 
       <section className="section bg-cream-50">
         <div className="container-x">
-          {items.length === 0 ? (
+          {confirmation ? (
+            <Confirmation order={confirmation} />
+          ) : items.length === 0 ? (
             <EmptyCart />
           ) : (
             <div className="grid gap-8 lg:grid-cols-3">
@@ -50,7 +73,7 @@ export default function Cart() {
                 <ul className="divide-y divide-coffee-100 border-b border-coffee-100">
                   {items.map((item) => (
                     <li
-                      key={item.id}
+                      key={item.sku}
                       className="flex flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
@@ -65,15 +88,15 @@ export default function Cart() {
                       <div className="flex items-center justify-between gap-4 sm:gap-6">
                         <QtyControl
                           qty={item.qty}
-                          onMinus={() => decrease(item.id)}
-                          onPlus={() => increase(item.id)}
+                          onMinus={() => decrease(item.sku)}
+                          onPlus={() => increase(item.sku)}
                         />
                         <span className="w-20 text-right font-semibold tabular-nums text-coffee-700">
                           {formatPrice(item.price * item.qty)}
                         </span>
                         <button
                           type="button"
-                          onClick={() => remove(item.id)}
+                          onClick={() => remove(item.sku)}
                           aria-label={`Remove ${item.name}`}
                           className="grid h-9 w-9 place-items-center rounded-sm text-coffee-400 transition hover:bg-red-50 hover:text-red-500"
                         >
@@ -106,13 +129,53 @@ export default function Cart() {
                     </div>
                   </dl>
 
-                  <button type="button" className="btn-accent mt-7 w-full">
-                    Checkout
+                  <div className="mt-6 space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Name (optional)"
+                      value={customer.name}
+                      onChange={(e) =>
+                        setCustomer((c) => ({ ...c, name: e.target.value }))
+                      }
+                      className="input"
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email (optional)"
+                      value={customer.email}
+                      onChange={(e) =>
+                        setCustomer((c) => ({ ...c, email: e.target.value }))
+                      }
+                      className="input"
+                    />
+                    <textarea
+                      placeholder="Notes for the kitchen (optional)"
+                      value={customer.note}
+                      onChange={(e) =>
+                        setCustomer((c) => ({ ...c, note: e.target.value }))
+                      }
+                      rows={2}
+                      className="input resize-none"
+                    />
+                  </div>
+
+                  {error && (
+                    <p className="mt-4 text-sm text-red-500">{error}</p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={onCheckout}
+                    disabled={placing}
+                    className="btn-accent mt-5 w-full disabled:opacity-60"
+                  >
+                    {placing ? "Placing order…" : "Checkout"}
                   </button>
                   <button
                     type="button"
                     onClick={clear}
-                    className="mt-3 w-full rounded-sm border border-coffee-100 px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-500 transition hover:border-red-300 hover:text-red-500"
+                    disabled={placing}
+                    className="mt-3 w-full rounded-sm border border-coffee-100 px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-500 transition hover:border-red-300 hover:text-red-500 disabled:opacity-60"
                   >
                     Clear Cart
                   </button>
@@ -176,6 +239,30 @@ function EmptyCart() {
       </p>
       <Link to="/menu" className="btn-accent mt-7">
         Browse Menu
+      </Link>
+    </div>
+  );
+}
+
+function Confirmation({ order }) {
+  return (
+    <div className="mx-auto max-w-xl rounded-md border border-coffee-100 bg-white p-12 text-center">
+      <div className="mx-auto mb-6 grid h-14 w-14 place-items-center rounded-sm bg-accent/10 text-xl text-accent">
+        <i className="fa-solid fa-check" />
+      </div>
+      <span className="eyebrow">Order placed</span>
+      <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight">
+        Thanks — we got it.
+      </h2>
+      <p className="mt-3 text-coffee-400">
+        Order <span className="font-mono text-coffee-700">{order._id}</span> for{" "}
+        <span className="font-semibold text-coffee-700">
+          ${order.total.toFixed(2)}
+        </span>{" "}
+        is in the queue.
+      </p>
+      <Link to="/menu" className="btn-accent mt-7">
+        Order something else
       </Link>
     </div>
   );
