@@ -245,6 +245,13 @@ function EmptyCart() {
 }
 
 function Confirmation({ order }) {
+  const firstName = (order.customer?.name || "").trim().split(/\s+/)[0];
+  const shortId = String(order._id).slice(-6).toUpperCase();
+  const heading = firstName ? `Thanks, ${firstName}!` : "Thanks — we got it.";
+  const subline = firstName
+    ? "We'll call your name when your order is ready."
+    : "Listen for your order number at the counter.";
+
   return (
     <div className="mx-auto max-w-xl rounded-md border border-coffee-100 bg-white p-12 text-center">
       <div className="mx-auto mb-6 grid h-14 w-14 place-items-center rounded-sm bg-accent/10 text-xl text-accent">
@@ -252,18 +259,39 @@ function Confirmation({ order }) {
       </div>
       <span className="eyebrow">Order placed</span>
       <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight">
-        Thanks — we got it.
+        {heading}
       </h2>
-      <p className="mt-3 text-coffee-400">
-        Order <span className="font-mono text-coffee-700">{order._id}</span> for{" "}
-        <span className="font-semibold text-coffee-700">
-          ${order.total.toFixed(2)}
-        </span>{" "}
-        is in the queue.
+      <p className="mt-3 text-coffee-400">{subline}</p>
+
+      <div className="mx-auto mt-8 grid max-w-sm grid-cols-2 gap-px overflow-hidden rounded-md border border-coffee-100 bg-coffee-100">
+        <div className="bg-white px-4 py-5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-coffee-400">
+            Order #
+          </p>
+          <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-coffee-700">
+            {shortId}
+          </p>
+        </div>
+        <div className="bg-white px-4 py-5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-coffee-400">
+            Total
+          </p>
+          <p className="mt-1 font-display text-2xl font-semibold tabular-nums text-coffee-700">
+            ${order.total.toFixed(2)}
+          </p>
+        </div>
+      </div>
+
+      <p className="mt-6 inline-flex items-center gap-2 rounded-sm bg-coffee-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-coffee-500">
+        <i className="fa-solid fa-clock text-coffee-400" />
+        Ready in about 5–10 min
       </p>
-      <Link to="/menu" className="btn-accent mt-7">
-        Order something else
-      </Link>
+
+      <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <Link to="/menu" className="btn-accent">
+          Order something else
+        </Link>
+      </div>
     </div>
   );
 }
